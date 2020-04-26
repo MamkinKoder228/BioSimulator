@@ -58,7 +58,7 @@ class Cell:
 			global Population
 			self.canvas.delete(self.body)
 			self.live = 0
-			Objects[self.Index] = None
+			Objects[self.index] = None
 			Population -= 1
 
 	
@@ -223,7 +223,7 @@ for i in range(1000):
 		obj.execute()
 		print("-"*20)
 		print("")
-		print("Имя:%s\nВид:%s\nВозраст:%s\nЭнергия:%s\nДНК:%s" % (obj.name, obj.Type, obj.age, obj.energy, obj.DNA))
+		print("Имя:%s\nВид:%s\nВозраст:%s\nЭнергия:%s\nДНК:%s\nId:%s" % (obj.name, obj.Type, obj.age, obj.energy, obj.DNA, obj.index))
 		root.update()
 		Population_history[i] = Population
 		sleep(1/Speed)
