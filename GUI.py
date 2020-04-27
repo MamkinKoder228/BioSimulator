@@ -17,7 +17,7 @@ CO2 = 1
 SunEnergy = Water * CO2
 Objects = [None] * 4096
 Foods = [None] * 200
-Speed = 4
+Speed = 400
 MutationChance = 0
 ExecMutationChance = 0
 Index = 0
@@ -184,18 +184,9 @@ class Cell:
 			
 		#### Make virus ####
 		elif self.DNA[self.EIP] == 10:
-			exec('virus%s = Virus(self.x+randint(-90, 90), self.y+randint(-90, 90), self.name, "Virus", self.DNA, self.canvas, "red", 20, self)' % str(uuid.uuid4().hex))
+			exec('virus%s = Virus(self.x+randint(-90, 90), self.y+randint(-90, 90), self.name, "Virus", self.DNA, self.canvas, "red", 20)' % str(uuid.uuid4().hex))
 			self.energy -= 1.5
 			self.EIP += 1
-		
-		### Detect ###
-		elif self.DNA[self.EIP] == 11:
-			if self.Sensor():
-				self.EIP = self.DNA[self.EIP + 1]
-			else:
-				self.EIP = self.DNA[self.EIP + 2]
-			self.energy -= 0.1
-		
 			
 		else:
 			self.EIP += 1
@@ -221,7 +212,7 @@ class Food:
 			root.update()
 
 class Virus:
-	def __init__(self, x, y, name, Type, DNA, canvas, color, radius, parent):
+	def __init__(self, x, y, name, Type, DNA, canvas, color, radius):
 		global Index
 		self.name = name
 		self.color = color
@@ -250,7 +241,8 @@ class Virus:
 		PosY = self.canvas.coords(self.body)[1] + self.radius / 2
 		
 		for target in Objects:
-			if target == None or target == self or target.live == 0 or target.infected == 0:continue
+			if target == None or target == self:continue
+			if target.live == 0 or target.infected == 1:continue
 			TargetX = self.canvas.coords(target.body)[0] + target.radius / 2
 			TargetY = self.canvas.coords(target.body)[1] + target.radius / 2
 			
@@ -269,26 +261,18 @@ class Virus:
 			
 #Note: for cell x, y, energy, radius, name, Type, color, DNA, canvas, number
 #For virus: x, y, name, Type, DNA, canvas, color, radius
-#DNA = [5, 1]
-#DNA for mutations
-#DNA = [2]*16
-#DNA = [1, 4, 4, 7, 2, 6, 1, 2, 6, 2, 3, 5, 4, 2, 2, 2]
-#DNA = [1, 6, 1, 3, 4, 5, 0, 4, 6, 5, 5, 5, 2, 2, 2, 2]
-#DNA = [5, 3, 2, 1, 5, 1, 1, 2, 5, 1, 1, 7, 4, 2, 2, 2]
-#DNA = [4, 2]
-#DNA = [6, 4, 8, 4, 1, 5, 1, 8, 1, 1, 8]
-#Sporofitus simpleus
-#DNA = [1, 1, 1, 1, 6, 1, 8, 26, 4, 0, 4, 0, 4, 0, 4, 0, 4, 0, 4, 0, 1, 1, 9, 0, 0, 0, 5, 2, 8]
-DNA = [1, 1, 4, 0]
-RNA = [1, 1, 10]
+
 
 def SpawnCells():
 	for i in range(50):
-		exec('cell%s = Cell(%s, %s, 20, 50, "Cell %s", "Photos longus ", "green", DNA, canvas, 0)' % (str(uuid.uuid4().hex),randint(0,field_width),randint(0,field_height),str(uuid.uuid4().hex)))
+		exec('cell%s = Cell(%s, %s, 2, 50, "Cell %s", "Photos longus ", "green", DNA, canvas, 0)' % (str(uuid.uuid4().hex),randint(0,field_width),randint(0,field_height),str(uuid.uuid4().hex)))
 
-SpawnCells()
 
-COVID = Virus(1800, randint(0, 1000), "COVID", "COVID - 20", RNA, canvas, "red", 20)
+
+
+if Speed <= 0:
+	print("Speed cannot be 0 or lower!")
+	exit()
 
 for i in range(1000):
 	for obj in Objects:
@@ -298,10 +282,6 @@ for i in range(1000):
 		print("")
 		print("Имя:%s\nВид:%s\nВозраст:%s\nЭнергия:%s\nДНК:%s\nId:%s" % (obj.name, obj.Type, obj.age, obj.energy, obj.DNA, obj.index))
 		root.update()
-		Population_history[i] = Population
-		sleep(1/Speed)
+	sleep(1/Speed)
 	
 root.mainloop()
-#plt.figure()
-#plt.plot(Population_history)
-#plt.show()
