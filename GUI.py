@@ -263,10 +263,9 @@ class Virus:
 #For virus: x, y, name, Type, DNA, canvas, color, radius
 
 
-def SpawnCells():
-	for i in range(50):
-		exec('cell%s = Cell(%s, %s, 2, 50, "Cell %s", "Photos longus ", "green", DNA, canvas, 0)' % (str(uuid.uuid4().hex),randint(0,field_width),randint(0,field_height),str(uuid.uuid4().hex)))
-
+def SpawnCells(count):
+	for i in range(count):
+		exec('cell%s = Cell(%s, %s, 4, 50, "Cell %s", "Photos longus ", "green", DNA, canvas, 0)' % (str(uuid.uuid4().hex),randint(0,field_width),randint(0,field_height),str(uuid.uuid4().hex)))
 
 
 
