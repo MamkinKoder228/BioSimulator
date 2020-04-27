@@ -24,7 +24,7 @@ Index = 0
 FoodIndex = 0
 
 root = Tk()
-root.title("Evolution by muxa 0.01a")
+root.title("BioSimulator by muxa 0.1")
 root.geometry("1920x1080")
 canvas = Canvas(root, bg = "cyan",height = field_height, width = field_width)
 canvas.pack()
