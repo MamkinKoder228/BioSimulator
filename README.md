@@ -16,4 +16,4 @@
 
 If you find any, please, report them!
   
-![Screenshot from game]("https://raw.githubusercontent.com/MamkinKoder228/BioSimulator/master/screenshot1.png" Screenshot)
+![Screenshot](screenshot1.png)
