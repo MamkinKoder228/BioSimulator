@@ -1,9 +1,9 @@
 from random import randint,uniform
 from time import sleep
 from tkinter import *
-from math import sin,cos,radians
+from math import sin,cos,radians,sqrt
 import matplotlib.pyplot as plt
-
+import uuid
 
 field_width = 1920
 field_height = 1080
@@ -12,14 +12,14 @@ Population = 0
 Population_history = [0] * 1000
 steps = 0
 Water = 1
-Temp = 5
+Temp = 10
 CO2 = 1
 SunEnergy = Water * CO2
-Objects = [None] * 2048
+Objects = [None] * 4096
 Foods = [None] * 200
-Speed = 100
+Speed = 4
 MutationChance = 0
-ExecMutationChance = 0.001
+ExecMutationChance = 0
 Index = 0
 FoodIndex = 0
 
@@ -49,6 +49,7 @@ class Cell:
 		self.energy = energy
 		self.MaxAge = 100 * Temp
 		self.name = name
+		self.infected = 0
 		Objects[Index] = self
 		self.index = Index
 		Index += 1
@@ -63,7 +64,7 @@ class Cell:
 
 	
 	def divide(self, energy):
-		exec("cell%s = Cell(self.x, self.y + self.radius, energy, self.radius, self.Type + str(self.number + 1),self.Type, self.color, self.DNA, self.canvas, self.number + 1)" % (self.number))
+		exec("cell%s = Cell(self.x, self.y + self.radius, energy, self.radius, self.Type + str(self.number + 1),self.Type, self.color, self.DNA, self.canvas, self.number + 1)" % (str(uuid.uuid4().hex)))
 	
 
 	def CheckCollisions(self):
@@ -82,8 +83,16 @@ class Cell:
 			self.canvas.move(self.body, RandDir, 3)
 		
 	def Sensor(self):
-		pass
-		
+		PosX = self.canvas.coords(self.body)[0] + self.radius / 2
+		PosY = self.canvas.coords(self.body)[1] + self.radius / 2
+		for target in Objects:
+			if target == self or target == None:continue
+			TargetX = self.canvas.coords(target.body)[0] + self.radius / 2
+			TargetY = self.canvas.coords(target.body)[1] + self.radius / 2
+			Distance = sqrt((TargetX - PosX) ** 2 - (TargetY - PosY) ** 2)
+			if Distance <= self.radius * 2:
+				return True
+		return False
 			
 	def execute(self):
 		#self.CheckCollisions()
@@ -94,7 +103,7 @@ class Cell:
 			
 		if uniform(0.001,1) <= ExecMutationChance:
 			MutIndex = randint(0,len(self.DNA) - 4)
-			self.DNA[MutIndex] = randint(0,7)
+			self.DNA[MutIndex] = randint(0,10)
 			
 		self.age += 1
 		if self.EIP >= len(self.DNA):
@@ -172,7 +181,22 @@ class Cell:
 		elif self.DNA[self.EIP] == 9:
 			self.number = self.DNA[self.EIP + 1]
 			self.EIP += 2
+			
+		#### Make virus ####
+		elif self.DNA[self.EIP] == 10:
+			exec('virus%s = Virus(self.x+randint(-90, 90), self.y+randint(-90, 90), self.name, "Virus", self.DNA, self.canvas, "red", 20, self)' % str(uuid.uuid4().hex))
+			self.energy -= 1.5
+			self.EIP += 1
 		
+		### Detect ###
+		elif self.DNA[self.EIP] == 11:
+			if self.Sensor():
+				self.EIP = self.DNA[self.EIP + 1]
+			else:
+				self.EIP = self.DNA[self.EIP + 2]
+			self.energy -= 0.1
+		
+			
 		else:
 			self.EIP += 1
 		
@@ -195,9 +219,56 @@ class Food:
 	def draw(self):
 			self.canvas.move(self.body, self.spdX, self.spdY)
 			root.update()
+
+class Virus:
+	def __init__(self, x, y, name, Type, DNA, canvas, color, radius, parent):
+		global Index
+		self.name = name
+		self.color = color
+		self.canvas = canvas
+		self.Type = Type
+		self.index = Index
+		Objects[Index] = self
+		Index += 1
+		self.DNA = DNA
+		self.x = x
+		self.y = y
+		self.radius = radius
+		self.body = self.canvas.create_oval(x, y, x + self.radius, y + self.radius, fill = color)
+		self.age = 0
+		self.energy = 0
+		self.live = 0
+		self.infected = 0
+		root.update()
 	
+	def destroy(self):
+		self.canvas.delete(self.body)
+		Objects[self.index] = None
+		
+	def search(self):
+		PosX = self.canvas.coords(self.body)[0] + self.radius / 2
+		PosY = self.canvas.coords(self.body)[1] + self.radius / 2
+		
+		for target in Objects:
+			if target == None or target == self or target.live == 0 or target.infected == 0:continue
+			TargetX = self.canvas.coords(target.body)[0] + target.radius / 2
+			TargetY = self.canvas.coords(target.body)[1] + target.radius / 2
+			
+			Distance = sqrt((TargetX - PosX) **2 + (TargetY - PosY) ** 2)
+			if Distance <= self.radius * 3:
+					target.DNA = self.DNA
+					target.infected = 1
+					self.destroy()
+					break
+					 
+	
+	def execute(self):
+		self.search()
+		
+
 			
 #Note: for cell x, y, energy, radius, name, Type, color, DNA, canvas, number
+#For virus: x, y, name, Type, DNA, canvas, color, radius
 #DNA = [5, 1]
 #DNA for mutations
 #DNA = [2]*16
@@ -207,15 +278,17 @@ class Food:
 #DNA = [4, 2]
 #DNA = [6, 4, 8, 4, 1, 5, 1, 8, 1, 1, 8]
 #Sporofitus simpleus
-DNA = [1, 1, 1, 1, 6, 1, 8, 26, 4, 0, 4, 0, 4, 0, 4, 0, 4, 0, 4, 0, 1, 1, 9, 0, 0, 0, 5, 2, 8]
-#DNA = [1, 1, 1, 5, 3, 8]
+#DNA = [1, 1, 1, 1, 6, 1, 8, 26, 4, 0, 4, 0, 4, 0, 4, 0, 4, 0, 4, 0, 1, 1, 9, 0, 0, 0, 5, 2, 8]
+DNA = [1, 1, 4, 0]
+RNA = [1, 1, 10]
 
 def SpawnCells():
-	for i in range(30):
-		exec('cell%s = Cell(%s, %s, 20, 25, "Cell %s", "Photos longus ", "green", DNA, canvas, 0)' % (i,randint(0,field_width),randint(0,field_height),i))
-
+	for i in range(50):
+		exec('cell%s = Cell(%s, %s, 20, 50, "Cell %s", "Photos longus ", "green", DNA, canvas, 0)' % (str(uuid.uuid4().hex),randint(0,field_width),randint(0,field_height),str(uuid.uuid4().hex)))
 
 SpawnCells()
+
+COVID = Virus(1800, randint(0, 1000), "COVID", "COVID - 20", RNA, canvas, "red", 20)
 
 for i in range(1000):
 	for obj in Objects:
@@ -228,7 +301,7 @@ for i in range(1000):
 		Population_history[i] = Population
 		sleep(1/Speed)
 	
-
-plt.figure()
-plt.plot(Population_history)
-plt.show()
+root.mainloop()
+#plt.figure()
+#plt.plot(Population_history)
+#plt.show()
