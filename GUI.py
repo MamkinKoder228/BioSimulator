@@ -1,6 +1,7 @@
 from random import randint,uniform
 from time import sleep
 from tkinter import *
+from tkinter import messagebox
 from math import sin,cos,radians,sqrt
 import matplotlib.pyplot as plt
 import uuid
@@ -184,7 +185,7 @@ class Cell:
 			
 		#### Make virus ####
 		elif self.DNA[self.EIP] == 10:
-			exec('virus%s = Virus(self.x+randint(-90, 90), self.y+randint(-90, 90), self.name, "Virus", self.DNA, self.canvas, "red", 20)' % str(uuid.uuid4().hex))
+			exec('virus%s = Virus(self.x+randint(-90, 90), self.y+randint(-90, 90), self.name, "Virus", self.DNA, self.canvas, "red", 15)' % str(uuid.uuid4().hex))
 			self.energy -= 1.5
 			self.EIP += 1
 			
@@ -261,13 +262,15 @@ class Virus:
 			
 #Note: for cell x, y, energy, radius, name, Type, color, DNA, canvas, number
 #For virus: x, y, name, Type, DNA, canvas, color, radius
+DNA = [1, 4, 0]
+RNA = [10] * 5 + [3]
 
-
-def SpawnCells(count):
+def SpawnCells(count, DNA):
 	for i in range(count):
 		exec('cell%s = Cell(%s, %s, 4, 50, "Cell %s", "Photos longus ", "green", DNA, canvas, 0)' % (str(uuid.uuid4().hex),randint(0,field_width),randint(0,field_height),str(uuid.uuid4().hex)))
 
-
+SpawnCells(50, DNA)
+virus = Virus(1800, randint(0,500), "COVID", "Karantin", RNA, canvas, "red", 15)
 
 if Speed <= 0:
 	print("Speed cannot be 0 or lower!")
@@ -282,5 +285,6 @@ for i in range(1000):
 		print("Имя:%s\nВид:%s\nВозраст:%s\nЭнергия:%s\nДНК:%s\nId:%s" % (obj.name, obj.Type, obj.age, obj.energy, obj.DNA, obj.index))
 		root.update()
 	sleep(1/Speed)
-	
+
+messagebox.showinfo("Simulation stopped", "Simulation stopped")
 root.mainloop()

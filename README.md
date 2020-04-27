@@ -9,9 +9,6 @@
 :white_check_mark: Viruses
 
 ## Bugs
-
-1. Sometimes cell die, but don't remove from canvas 
-
 2. I don't know can i name that bug or not, but spawning a lot of objects can cause lag
 
 If you find any, please, report them!
